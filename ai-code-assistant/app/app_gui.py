@@ -1,8 +1,10 @@
+# Importando bibliotecas
 import customtkinter
 import threading
 import queue
 
 from customtkinter import CTkInputDialog
+# Importando dos modulos
 from core.agent import code_assistant
 from app.prompt_manager import PromptManager
 
@@ -21,7 +23,6 @@ class ChatApp:
         self.root.grid_rowconfigure(2, weight=0) # Biblioteca de Prompts
         self.root.grid_rowconfigure(3, weight=0) # Entrada
 
-        # Atribui o agente à classe
         self.code_assistant = code_assistant 
         self.prompt_manager = PromptManager()
 
@@ -46,22 +47,22 @@ class ChatApp:
         # Menu de seleção de modelo
         self.model_choice = customtkinter.CTkOptionMenu(
             self.options_frame, 
-            values=["Gemini"],#, "Local (Ollama)"], futuramente ser adicionado
+            values=["Gemini"],
         )
         self.model_choice.grid(row=0, column=1, sticky="w", padx=5, pady=5)
-        self.model_choice.set("Gemini") # Começa com Gemini
+        self.model_choice.set("Gemini")
 
-        # --- Botão de Prompts Rápidos ---
+        # Prompts Rápidos
         self.prompt_toggle_button = customtkinter.CTkButton(
             self.options_frame,
-            text="🚀 Prompts Rápidos",
+            text="🔼 Prompts Rápidos",
             font=("Arial", 13, "bold"),
             width=150,
             command=self.toggle_prompt_library
         )
         self.prompt_toggle_button.grid(row=0, column=2, sticky="e", padx=(10, 10), pady=5)
 
-        # --- Frame da Biblioteca de Prompts (Inicia escondido) ---
+        # Frame Prompts Rapidos
         self.prompt_library_visible = False
         self.prompt_library_target_height = 180 # Altura máxima do painel
         
@@ -86,12 +87,12 @@ class ChatApp:
         )
         self.add_prompt_button.grid(row=1, column=0, sticky="ew", padx=10, pady=10)
 
-        # Listas para guardar os prompts e seus widgets
-        self.prompt_list = [] # Será preenchido pelo _load_prompts_from_db
+        # Listas para guardar os prompts e seus widgets. Preenchidos em _load_prompts_from_db
+        self.prompt_list = []
         self.prompt_widgets = []
 
 
-        # Frame de entrada (Movido para row=3)
+        # Frame de entrada
         self.input_frame = customtkinter.CTkFrame(root, height=60, corner_radius=0)
         self.input_frame.grid(row=3, column=0, sticky="nsew", padx=10, pady=(5, 10))
         self.input_frame.grid_columnconfigure(0, weight=1)
@@ -124,10 +125,10 @@ class ChatApp:
         self.loading_label = None
         self.loading_animation_id = None
         
-        # Mensagem de boas-vindas atualizada
-        self.add_message_bubble("💻 Assistente", "Olá! Eu sou seu assistente de código Python. Use o botão '🚀 Prompts Rápidos' para salvar e usar seus comandos favoritos.", is_user=False)
+        # Boas Vindas Mensagem
+        self.add_message_bubble("💻 Assistente", "Olá! Eu sou seu assistente de código Python. Use o botão '🔼 Prompts Rápidos' para salvar e usar seus comandos favoritos.", is_user=False)
         
-        # Carrega prompts iniciais (agora vindo do DB)
+        # Carrega prompts iniciais vindo do DB
         self._load_prompts()
         
     # --- Métodos da Biblioteca de Prompts (COM BANCO DE DADOS) ---
@@ -163,12 +164,12 @@ class ChatApp:
         self.prompt_toggle_button.configure(state="disabled") # Desabilita durante a animação
         
         if self.prompt_library_visible:
-            # Fechar
-            self.prompt_toggle_button.configure(text="🚀 Prompts Rápidos")
+            # Abrir aba de prompts
+            self.prompt_toggle_button.configure(text="🔼 Prompts Rápidos")
             self.animate_prompt_library(opening=False)
         else:
-            # Abrir
-            self.prompt_toggle_button.configure(text="🔼 Fechar Prompts")
+            # Fechar aba de prompts
+            self.prompt_toggle_button.configure(text="🔽 Fechar Prompts")
             self.prompt_library_frame.grid() # Mostra o frame antes de animar
             self.animate_prompt_library(opening=True)
             
@@ -243,21 +244,20 @@ class ChatApp:
                 font=("Arial", 12, "bold"),
                 command=lambda p=prompt_text: self.use_prompt(p)
             )
-            use_button.grid(row=0, column=1, sticky="e", padx=(5, 5), pady=5)
+            use_button.grid(row=0, column=1, sticky="e", padx=(5, 20), pady=5)
 
             # Botão "Excluir"
             del_button = customtkinter.CTkButton(
                 prompt_frame,
                 text="X",
                 width=30,
-                fg_color=("#F08080", "#8B0000"), # Cor de perigo
+                fg_color=("#F08080", "#8B0000"),
                 hover_color=("#CD5C5C", "#DC143C"),
                 command=lambda p=prompt_text: self.delete_prompt(p)
             )
             del_button.grid(row=0, column=2, sticky="e", padx=(0, 5), pady=5)
             
             self.prompt_widgets.append(prompt_frame)
-        # ---------------------------------
 
     def use_prompt(self, prompt_text):
         """Cola o prompt selecionado na caixa de entrada e fecha o painel."""
@@ -268,7 +268,6 @@ class ChatApp:
         if self.prompt_library_visible:
             self.toggle_prompt_library()
 
-    # --- Métodos Originais do Chat (com ajustes de altura) ---
 
     def send_message_event(self, event=None):
         """Pega o texto da entrada, inicia o processo de envio e limpa a caixa."""
@@ -344,7 +343,7 @@ class ChatApp:
             bubble_frame,
             font=("Arial", 14),
             wrap="word",
-            # activate_scrollbars=False, # <-- REMOVIDA LINHA COM ERRO
+            activate_scrollbars=False,
             fg_color="transparent",
             text_color=text_color
         )
@@ -355,13 +354,10 @@ class ChatApp:
         
         self.root.update_idletasks()
         
-        # --- Cálculo de altura aprimorado ---
+        # Cálculo de altura
         message_box.update_idletasks()
         lines = int(message_box.index("end-1c").split('.')[0])
         
-        # --- CORREÇÃO ---
-        # O .cget("font") retorna a tupla/string, não o objeto CTkFont.
-        # Precisamos criar um objeto CTkFont para obter as métricas.
         font_data = message_box.cget("font")
         if isinstance(font_data, customtkinter.CTkFont):
             font = font_data
@@ -370,7 +366,6 @@ class ChatApp:
             font = customtkinter.CTkFont(family=font_data[0], size=font_data[1])
 
         line_height = font.metrics("linespace") 
-        # --- FIM DA CORREÇÃO ---
         
         padding_vertical = 20
         min_height = line_height + padding_vertical
@@ -380,10 +375,6 @@ class ChatApp:
         final_height = min(max(min_height, calculated_height), max_height)
         
         message_box.configure(height=final_height)
-        
-        # if calculated_height > max_height:
-        #      message_box.configure(activate_scrollbars=True) # <-- REMOVIDA LINHA COM ERRO
-        # -------------------------------------
 
         bubble_frame.pack(fill="x", padx=10, pady=5, anchor=anchor)
         
@@ -434,7 +425,7 @@ class ChatApp:
             bubble_frame,
             font=("Arial", 14),
             wrap="word",
-            # activate_scrollbars=False, # <-- REMOVIDA LINHA COM ERRO
+            # activate_scrollbars=False,
             fg_color="transparent",
             text_color="#FFFFFF",
             height=30 # Altura inicial mínima
@@ -468,7 +459,6 @@ class ChatApp:
             text_widget.update_idletasks()
             lines = int(text_widget.index("end-1c").split('.')[0])
             
-            # --- CORREÇÃO ---
             font_data = text_widget.cget("font")
             if isinstance(font_data, customtkinter.CTkFont):
                 font = font_data
@@ -476,7 +466,6 @@ class ChatApp:
                 font = customtkinter.CTkFont(family=font_data[0], size=font_data[1])
                 
             line_height = font.metrics("linespace")
-            # --- FIM DA CORREÇÃO ---
 
             padding_vertical = 20
             min_height = line_height + padding_vertical
@@ -486,9 +475,6 @@ class ChatApp:
             final_height = min(max(min_height, calculated_height), max_height)
             
             text_widget.configure(height=final_height)
-            
-            # if calculated_height > max_height:
-            #     text_widget.configure(activate_scrollbars=True) # <-- REMOVIDA LINHA COM ERRO
 
             self._scroll_to_bottom()
             

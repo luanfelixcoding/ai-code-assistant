@@ -6,6 +6,7 @@ class PromptManager:
         self._init_database_table()
 
     def _init_database_table(self):
+        """Inicializa o banco de dados com a tabela estruturada"""
         with sqlite3.connect(self.db_path) as conn:
             cursor = conn.cursor()
             cursor.execute("""
@@ -37,7 +38,7 @@ class PromptManager:
             return results
 
     def add_prompt(self, prompt_text):
-        """Adiciona um novo prompt. Retorna True se sucesso, False se falhar (ex. já existe)."""
+        """Adiciona um novo prompt. Retorna True se sucesso, False se falhar."""
         try:
             with sqlite3.connect(self.db_path) as conn:
                 cursor = conn.cursor()
