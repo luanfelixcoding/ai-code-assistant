@@ -3,8 +3,8 @@ import os
 import uuid
 import threading
 from flask import Flask, render_template, request, jsonify, Response, stream_with_context
-from backend.prompt_manager import PromptManager
-from backend.agent import code_assistant
+from app.backend.prompt_manager import PromptManager
+from app.backend.agent import code_assistant
 
 app = Flask(__name__)
 prompt_manager = PromptManager()
