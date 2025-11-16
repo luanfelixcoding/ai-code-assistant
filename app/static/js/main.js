@@ -1,5 +1,6 @@
 class ChatApp {
   constructor() {
+    // Elementos DOM
     this.chatContainer = document.getElementById('chat-container');
     this.promptInput = document.getElementById('prompt-input');
     this.sendBtn = document.getElementById('send-btn');
@@ -9,11 +10,22 @@ class ChatApp {
     this.addPromptBtn = document.getElementById('add-prompt-direct');
     this.newPromptInput = document.getElementById('new-prompt-input');
     this.themeToggle = document.getElementById('theme-toggle');
-    this.currentTheme = localStorage.getItem('theme') || 'dark';
 
+    // Upload de arquivo
+    this.fileInput = document.getElementById('file-upload');
+    this.fileUploadLabel = document.getElementById('file-upload-label');
+    this.plusIcon = document.getElementById('plus-icon');
+    this.checkIcon = document.getElementById('check-icon');
+    this.filePreview = document.getElementById('file-preview');
+    this.fileNameText = document.getElementById('file-name-text');
+    this.removeFileBtn = document.getElementById('remove-file-btn');
+    this.dropZone = document.getElementById('drop-zone');
+    this.fileError = document.getElementById('file-error');
+
+    this.currentTheme = localStorage.getItem('theme') || 'dark';
     this.prompts = [];
     this.isLibraryOpen = false;
-    this.currentBotMessage = null; // Agora armazena o elemento de loading ou mensagem
+    this.currentBotMessage = null;
 
     this.init();
   }
@@ -27,9 +39,9 @@ class ChatApp {
   }
 
   bindEvents() {
+    // Enviar mensagem
     this.sendBtn.addEventListener('click', () => this.sendMessage());
 
-    // Enter = enviar, Shift+Enter = nova linha
     this.promptInput.addEventListener('keydown', (e) => {
       if (e.key === 'Enter' && !e.shiftKey) {
         e.preventDefault();
@@ -39,6 +51,7 @@ class ChatApp {
 
     this.promptInput.addEventListener('input', () => this.adjustTextareaHeight());
 
+    // Biblioteca de prompts
     this.toggleBtn.addEventListener('click', () => this.togglePromptLibrary());
     this.addPromptBtn.addEventListener('click', () => this.addPromptDirect());
     this.newPromptInput.addEventListener('keydown', (e) => {
@@ -48,8 +61,107 @@ class ChatApp {
       }
     });
 
+    // Upload de arquivo
+    if (this.fileInput) {
+      this.fileInput.addEventListener('change', () => this.handleFileSelect());
+    }
+
+    if (this.removeFileBtn) {
+      this.removeFileBtn.addEventListener('click', () => this.removeFile());
+    }
+
+    // Drag & Drop
+    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+      this.dropZone.addEventListener(eventName, e => e.preventDefault(), false);
+    });
+
+    ['dragenter', 'dragover'].forEach(eventName => {
+      this.dropZone.addEventListener(eventName, () => this.dropZone.classList.add('drag-over'), false);
+    });
+
+    ['dragleave', 'drop'].forEach(eventName => {
+      this.dropZone.addEventListener(eventName, () => this.dropZone.classList.remove('drag-over'), false);
+    });
+
+    this.dropZone.addEventListener('drop', e => {
+      const file = e.dataTransfer.files[0];
+      if (file) {
+        this.fileInput.files = e.dataTransfer.files;
+        this.handleFileSelect();
+      }
+    });
+
     this.adjustTextareaHeight();
   }
+
+  // --- UPLOAD DE ARQUIVO ---
+
+  handleFileSelect() {
+    const file = this.fileInput.files[0];
+    this.hideError();
+
+    if (!file) return;
+
+    // Validação
+    if (!file.name.endsWith('.py')) {
+      this.showError('Apenas arquivos .py são permitidos.');
+      this.removeFile();
+      return;
+    }
+
+    if (file.size > 1024 * 1024) {
+      this.showError('Arquivo muito grande (máx: 1MB).');
+      this.removeFile();
+      return;
+    }
+
+    // Sucesso: exibe preview e troca ícone
+    this.fileNameText.textContent = file.name;
+    this.fileNameText.title = file.name;
+    this.filePreview.style.display = 'flex';
+
+    // Troca + por check
+    this.plusIcon.style.opacity = '0';
+    setTimeout(() => {
+      this.plusIcon.style.display = 'none';
+      this.checkIcon.style.display = 'flex';
+      setTimeout(() => this.checkIcon.classList.add('show'), 10);
+    }, 200);
+  }
+
+  removeFile() {
+    this.fileInput.value = '';
+    this.filePreview.style.display = 'none';
+    this.hideError();
+
+    // Volta o +
+    this.checkIcon.classList.remove('show');
+    setTimeout(() => {
+      this.checkIcon.style.display = 'none';
+      this.plusIcon.style.display = 'flex';
+      setTimeout(() => this.plusIcon.style.opacity = '1', 10);
+    }, 200);
+  }
+
+  showError(message) {
+    this.fileError.textContent = message;
+    this.fileError.classList.add('show');
+  }
+
+  hideError() {
+    this.fileError.classList.remove('show');
+  }
+
+  readFileContent(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = (e) => resolve(e.target.result);
+    reader.onerror = () => reject(new Error('Falha ao ler arquivo'));
+    reader.readAsText(file, 'utf-8');
+  });
+}
+
+  // --- FIM UPLOAD ---
 
   adjustTextareaHeight() {
     const textarea = this.promptInput;
@@ -86,66 +198,91 @@ class ChatApp {
   }
 
   async sendMessage() {
-    const prompt = this.promptInput.value.trim();
-    if (!prompt) return;
+  const prompt = this.promptInput.value.trim();
+  if (!prompt) return;
 
-    this.addMessage("Você", prompt, true);
-    this.promptInput.value = '';
-    this.adjustTextareaHeight();
-    this.setInputState(false);
+  const file = this.fileInput.files[0];
+  let userMessage = prompt;
+  let fileContent = '';
 
-    this.startBotTyping(); // Mostra os 3 pontinhos
-
+  // Se há arquivo, lê o conteúdo
+  if (file) {
     try {
-      const startRes = await fetch('/chat', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ prompt })
-      });
+      fileContent = await this.readFileContent(file);
+      userMessage += ` (Arquivo anexado: ${file.name})`;
+    } catch (err) {
+      this.appendToBotMessage("\n\n**Erro ao ler o arquivo:** Não foi possível processar o conteúdo.");
+      this.stopBotTyping();
+      this.setInputState(true);
+      return;
+    }
+  }
 
-      if (!startRes.ok) {
-        const err = await startRes.json();
-        this.appendToBotMessage(`\n\n**Erro:** ${err.error || 'Falha na API'}`);
+  this.addMessage("Você", userMessage, true);
+  this.promptInput.value = '';
+  this.adjustTextareaHeight();
+  this.setInputState(false);
+  this.removeFile(); // Limpa UI
+
+  this.startBotTyping();
+
+  try {
+    const formData = new FormData();
+    formData.append('prompt', prompt);
+
+    if (file) {
+      formData.append('file', file);                    // Binário (opcional)
+      formData.append('file_content', fileContent);     // ← CONTEÚDO DO ARQUIVO
+      formData.append('file_name', file.name);
+    }
+
+    const startRes = await fetch('/chat', {
+      method: 'POST',
+      body: formData
+    });
+
+    if (!startRes.ok) {
+      const err = await startRes.json();
+      this.appendToBotMessage(`\n\n**Erro:** ${err.error || 'Falha na API'}`);
+      this.stopBotTyping();
+      this.setInputState(true);
+      return;
+    }
+
+    const { session_id } = await startRes.json();
+    const evtSource = new EventSource(`/stream/${session_id}`);
+
+    evtSource.onmessage = (e) => {
+      if (e.data === '<END>') {
+        evtSource.close();
         this.stopBotTyping();
         this.setInputState(true);
         return;
       }
-
-      const { session_id } = await startRes.json();
-      const evtSource = new EventSource(`/stream/${session_id}`);
-
-      evtSource.onmessage = (e) => {
-        if (e.data === '<END>') {
-          evtSource.close();
-          this.stopBotTyping();
-          this.setInputState(true);
-          return;
+      try {
+        const data = JSON.parse(e.data);
+        if (data.content) {
+          this.appendToBotMessage(data.content);
         }
-        try {
-          const data = JSON.parse(e.data);
-          if (data.content) {
-            this.appendToBotMessage(data.content);
-          }
-        } catch (_) {}
-      };
+      } catch (_) {}
+    };
 
-      evtSource.onerror = () => {
-        evtSource.close();
-        this.appendToBotMessage("\n\nFalha na conexão com o servidor.");
-        this.stopBotTyping();
-        this.setInputState(true);
-      };
-
-    } catch (err) {
-      this.appendToBotMessage("\n\nErro de rede. Verifique sua conexão.");
+    evtSource.onerror = () => {
+      evtSource.close();
+      this.appendToBotMessage("\n\nFalha na conexão com o servidor.");
       this.stopBotTyping();
       this.setInputState(true);
-    }
-  }
+    };
 
-  // Animacao Pensando (3 pontinhos)
+  } catch (err) {
+    this.appendToBotMessage("\n\nErro de rede. Verifique sua conexão.");
+    this.stopBotTyping();
+    this.setInputState(true);
+  }
+}
+
+  // --- ANIMAÇÃO DE DIGITANDO ---
   startBotTyping() {
-    // Remove loading anterior se existir
     const existingLoading = this.chatContainer.querySelector('.loading-text');
     if (existingLoading) existingLoading.closest('.message').remove();
 
@@ -171,7 +308,6 @@ class ChatApp {
   }
 
   appendToBotMessage(chunk) {
-    // Se ainda estiver no loading, cria a mensagem real
     if (this.currentBotMessage.isLoading) {
       this.stopBotTyping();
       const { message, textEl } = this.createBotMessageElement();
@@ -182,7 +318,6 @@ class ChatApp {
       const html = marked.parse(this.currentBotMessage.rawText);
       this.currentBotMessage.textEl.innerHTML = html;
 
-      // Adiciona botão de copiar com ícone
       this.currentBotMessage.textEl.querySelectorAll('pre code').forEach(block => {
         if (!block.parentElement.querySelector('.copy-btn')) {
           this.addCopyButton(block);
@@ -194,35 +329,35 @@ class ChatApp {
   }
 
   addCopyButton(codeBlock) {
-  const pre = codeBlock.parentElement;
-  if (pre.querySelector('.copy-btn')) return;
+    const pre = codeBlock.parentElement;
+    if (pre.querySelector('.copy-btn')) return;
 
-  const copyBtn = document.createElement('button');
-  copyBtn.className = 'copy-btn';
-  copyBtn.innerHTML = `
-    <i class="fa-solid fa-copy"></i>
-    <i class="fa-solid fa-check"></i>
-    <span class="copy-text">Copiar</span>
-  `;
+    const copyBtn = document.createElement('button');
+    copyBtn.className = 'copy-btn';
+    copyBtn.innerHTML = `
+      <i class="fa-solid fa-copy"></i>
+      <i class="fa-solid fa-check"></i>
+      <span class="copy-text">Copiar</span>
+    `;
 
-  copyBtn.addEventListener('click', async () => {
-    try {
-      await navigator.clipboard.writeText(codeBlock.textContent);
-      copyBtn.classList.add('copied');
-      const text = copyBtn.querySelector('.copy-text');
-      text.textContent = 'Copiado!';
+    copyBtn.addEventListener('click', async () => {
+      try {
+        await navigator.clipboard.writeText(codeBlock.textContent);
+        copyBtn.classList.add('copied');
+        const text = copyBtn.querySelector('.copy-text');
+        text.textContent = 'Copiado!';
 
-      setTimeout(() => {
-        copyBtn.classList.remove('copied');
-        text.textContent = 'Copiar';
-      }, 1500);
-    } catch (err) {
-      console.error('Erro ao copiar:', err);
-    }
-  });
+        setTimeout(() => {
+          copyBtn.classList.remove('copied');
+          text.textContent = 'Copiar';
+        }, 1500);
+      } catch (err) {
+        console.error('Erro ao copiar:', err);
+      }
+    });
 
-  pre.insertBefore(copyBtn, pre.firstChild);
-}
+    pre.insertBefore(copyBtn, pre.firstChild);
+  }
 
   createBotMessageElement() {
     const message = document.createElement('div');
@@ -278,23 +413,20 @@ class ChatApp {
   }
 
   togglePromptLibrary() {
-  this.isLibraryOpen = !this.isLibraryOpen;
-  this.promptLibrary.classList.toggle('expanded', this.isLibraryOpen);
-  
-  const toggleBtn = this.toggleBtn;
-  const icon = toggleBtn.querySelector('.toggle-icon');
-  const text = toggleBtn.querySelector('span') || toggleBtn;
+    this.isLibraryOpen = !this.isLibraryOpen;
+    this.promptLibrary.classList.toggle('expanded', this.isLibraryOpen);
 
-  if (this.isLibraryOpen) {
-    toggleBtn.innerHTML = `Fechar Prompts <i class="fa-solid fa-angle-up toggle-icon"></i>`;
-    toggleBtn.classList.add('active');
-  } else {
-    toggleBtn.innerHTML = `Prompts Rápidos <i class="fa-solid fa-angle-up toggle-icon"></i>`;
-    toggleBtn.classList.remove('active');
+    const toggleBtn = this.toggleBtn;
+    if (this.isLibraryOpen) {
+      toggleBtn.innerHTML = `Fechar Prompts <i class="fa-solid fa-angle-up toggle-icon"></i>`;
+      toggleBtn.classList.add('active');
+    } else {
+      toggleBtn.innerHTML = `Prompts Rápidos <i class="fa-solid fa-angle-up toggle-icon"></i>`;
+      toggleBtn.classList.remove('active');
+    }
+
+    if (this.isLibraryOpen) this.newPromptInput.focus();
   }
-
-  if (this.isLibraryOpen) this.newPromptInput.focus();
-}
 
   async addPromptDirect() {
     const text = this.newPromptInput.value.trim();
@@ -383,6 +515,7 @@ class ChatApp {
   }
 }
 
+// Inicializa o app
 document.addEventListener('DOMContentLoaded', () => {
   new ChatApp();
 });

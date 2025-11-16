@@ -874,3 +874,345 @@ body {
     padding: 8px;
   }
 }
+
+/* Novo: Estilos para upload de arquivo */
+/* Botão de Upload à ESQUERDA - Ícone com + */
+.file-upload-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--surface2);
+  border: 1.5px solid var(--border);
+  width: 53px;
+  height: 53px;
+  border-radius: 16px;
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  flex-shrink: 0;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.file-upload-btn:hover {
+  background: var(--border);
+  border-color: var(--primary);
+  transform: translateY(-2px) scale(1.05);
+  box-shadow: 0 8px 20px rgba(16, 185, 129, 0.2);
+}
+
+.file-upload-btn i {
+  font-size: 18px;
+  color: var(--text-muted);
+  transition: all 0.2s ease;
+}
+
+.file-upload-btn .plus-icon {
+  font-size: 10px;
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: var(--primary);
+  color: white;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0.9;
+}
+
+/* Ajuste no input-area para manter alinhamento */
+.input-area {
+  display: flex;
+  gap: 10px;
+  padding: 10px 0;
+  align-items: flex-start;
+}
+
+/* Garante que o textarea e o botão de enviar mantenham o mesmo tamanho */
+#prompt-input,
+#send-btn {
+  min-height: 53px;
+}
+
+#send-btn {
+  width: 53px;
+  height: 53px;
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ============================================================= */
+/* ESTILOS PARA UPLOAD DE ARQUIVO (.py) - UX PREMIUM */
+/* ============================================================= */
+
+/* Wrapper principal (inclui botão + preview + erro + drag zone) */
+.file-upload-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+/* Zona de Drag & Drop */
+#drop-zone {
+  position: relative;
+  padding: 4px;
+  border-radius: 16px;
+  transition: all 0.3s ease;
+}
+
+#drop-zone.drag-over {
+  outline: 2px dashed var(--primary);
+  outline-offset: -2px;
+  background: rgba(16, 185, 129, 0.05);
+  border-radius: 16px;
+  animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { outline-color: var(--primary); }
+  50% { outline-color: rgba(16, 185, 129, 0.6); }
+}
+
+#drop-zone.drag-over .file-upload-btn {
+  transform: scale(1.08);
+  border-color: var(--primary);
+  box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.15);
+}
+
+/* Botão de Upload (ícone clipe) */
+.file-upload-btn {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--surface2);
+  border: 1.5px solid var(--border);
+  width: 53px;
+  height: 53px;
+  border-radius: 16px;
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  flex-shrink: 0;
+}
+
+.file-upload-btn:hover {
+  background: var(--border);
+  border-color: var(--primary);
+  transform: translateY(-2px) scale(1.05);
+  box-shadow: 0 8px 20px rgba(16, 185, 129, 0.2);
+}
+
+.file-upload-btn i {
+  font-size: 18px;
+  color: var(--text-muted);
+  transition: color 0.2s ease;
+}
+
+/* Ícone + (aparece quando não há arquivo) */
+.plus-icon {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  font-size: 10px;
+  background: var(--primary);
+  color: white;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0.9;
+  transition: all 0.2s ease;
+}
+
+/* Ícone de check verde (aparece após anexar) */
+.check-icon {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  font-size: 10px;
+  background: #10B981;
+  color: white;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: all 0.2s ease;
+}
+
+.check-icon.show {
+  opacity: 1;
+  display: flex;
+}
+
+/* Preview do arquivo anexado */
+.file-preview {
+  display: flex;
+  align-items: center;
+  background: var(--surface);
+  border: 1.5px solid var(--primary);
+  border-radius: 12px;
+  padding: 6px 10px;
+  font-size: 13px;
+  color: var(--text);
+  max-width: 180px;
+  gap: 8px;
+  animation: slideIn 0.3s ease forwards;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateX(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.file-name {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 120px;
+  font-weight: 500;
+  color: var(--text);
+}
+
+/* Tooltip ao passar o mouse no nome do arquivo */
+.file-name[title]:hover::after {
+  content: attr(title);
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--surface);
+  color: var(--text);
+  padding: 6px 10px;
+  border-radius: 8px;
+  font-size: 12px;
+  white-space: nowrap;
+  z-index: 1000;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  margin-bottom: 8px;
+  font-family: 'Inter', sans-serif;
+}
+
+.file-name[title]:hover::before {
+  content: "";
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border: 6px solid transparent;
+  border-top-color: var(--surface);
+  margin-bottom: 2px;
+  z-index: 1000;
+}
+
+/* Botão remover arquivo (X) */
+.remove-file-btn {
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 16px;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: all 0.2s ease;
+  padding: 0;
+}
+
+.remove-file-btn:hover {
+  background: rgba(239, 68, 68, 0.2);
+  color: #ef4444;
+}
+
+/* Mensagem de erro */
+.file-error {
+  color: #ef4444;
+  font-size: 12px;
+  margin-top: 4px;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  font-weight: 500;
+  max-width: 180px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.file-error.show {
+  opacity: 1;
+}
+
+/* ============================================================= */
+/* AJUSTES GERAIS DA ÁREA DE INPUT */
+/* ============================================================= */
+
+.input-area {
+  display: flex;
+  gap: 10px;
+  padding: 10px 0;
+  align-items: flex-start;
+}
+
+/* Altura mínima consistente */
+#prompt-input,
+#send-btn {
+  min-height: 53px;
+}
+
+#send-btn {
+  width: 53px;
+  height: 53px;
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--primary);
+  color: white;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+#send-btn:hover {
+  background: var(--primary-hover, #0ea271);
+  transform: translateY(-1px);
+}
+
+/* Responsividade */
+@media (max-width: 480px) {
+  .file-preview {
+    max-width: 130px;
+    font-size: 12px;
+    padding: 5px 8px;
+  }
+  .file-name {
+    max-width: 90px;
+  }
+  .file-error {
+    font-size: 11px;
+    max-width: 130px;
+  }
+  .input-area {
+    gap: 8px;
+  }
+}
