@@ -25,7 +25,8 @@ Ideal para desenvolvedores Python que precisam de ajuda rápida e contextualizad
 
 ## Requisitos
 - Python 3.8 ou superior.
-- Bibliotecas: `Flask`, `python-dotenv`, `google-generativeai`, `sqlite3`, `werkzeug`.
+- Bibliotecas: `python-dotenv`, `google-generativeai`, `sqlite3`, `werkzeug`.
+- Frameworks: `flask`, `agno`.
 - Chave API do Google Gemini (gratuita para uso básico).
 - `uv` Gerenciador de Pacotes (**Opcional**)
 
@@ -57,8 +58,7 @@ Ideal para desenvolvedores Python que precisam de ajuda rápida e contextualizad
    Com uv:
    uv sync
    ```
-   *Nota: Se usar a biblioteca `agno` (para agente Gemini), instale-a separadamente se não for built-in.*
-
+   
 4. **Configure Variáveis de Ambiente**:
    Crie um arquivo `.env` na raiz do projeto:
    ```
