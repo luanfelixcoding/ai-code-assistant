@@ -3,13 +3,13 @@
 [![Python](https://img.shields.io/badge/Python-3.8%2B-blue)](https://www.python.org/)
 [![Flask](https://img.shields.io/badge/Flask-2.0%2B-green)](https://flask.palletsprojects.com/)
 [![Gemini API](https://img.shields.io/badge/Gemini%20API-Integrated-orange)](https://ai.google.dev/)
-[![Licença](https://img.shields.io/badge/Licença-MIT-yellow)](LICENSE)
+[![Licença](https://img.shields.io/badge/Licença-MIT-yellow)](https://mit-license.org)
 
 ## Visão Geral
 
 Este projeto é um **assistente de chat baseado em IA** especializado em programação Python. Ele permite que usuários façam perguntas sobre código, sintaxe, bibliotecas e otimizações, com suporte para anexar arquivos `.py` para análise direta. A IA é alimentada pela API do Google Gemini, garantindo respostas precisas e atualizadas .
 
-O aplicativo é full-stack:
+O aplicativo é **full-stack**:
 - **Backend**: Flask para servidor, gerenciamento de sessões, streaming de respostas e banco **SQLite** para prompts salvos.
 - **Frontend**: Interface intuitiva em HTML/CSS/JS com upload de arquivos (drag & drop), temas dark/light, renderização de Markdown e código destacado.
 
@@ -27,32 +27,34 @@ Ideal para desenvolvedores Python que precisam de ajuda rápida e contextualizad
 - Python 3.8 ou superior.
 - Bibliotecas: `Flask`, `python-dotenv`, `google-generativeai`, `sqlite3`, `werkzeug`.
 - Chave API do Google Gemini (gratuita para uso básico).
+- `uv` Gerenciador de Pacotes (**Opcional**)
 
 ## Instalação
 
 1. **Clone o Repositório**:
    ```
-   git clone https://github.com/seu-usuario/assistente-codigo-python.git
-   cd assistente-codigo-python
+   git clone https://github.com/seu-usuario/ai-code-assistant.git
+   cd ai-code-assistant
+   cd .\app\
    ```
 
 2. **Crie um Ambiente Virtual** (recomendado):
    ```
-   Sem UV:
+   Sem uv:
    python -m venv .venv
    source venv/bin/activate  # No Windows: .venv\Scripts\activate
    
-   Com UV:
+   Com uv:
    uv sync
    source venv/bin/activate  # No Windows: .venv\Scripts\activate
    ```
 
 3. **Instale Dependências**:
    ```
-   Sem UV:
-   pip install flask python-dotenv google-generativeai werkzeug
+   Sem uv:
+   pip install -r requirements.txt
    
-   Com UV:
+   Com uv:
    uv sync
    ```
    *Nota: Se usar a biblioteca `agno` (para agente Gemini), instale-a separadamente se não for built-in.*
@@ -66,10 +68,10 @@ Ideal para desenvolvedores Python que precisam de ajuda rápida e contextualizad
 
 5. **Inicie o Servidor**:
    ```
-   Sem UV:
+   Sem uv:
    python app.py
    
-   Com UV:
+   Com uv:
    uv run app.py
    ```
    O app rodará em `http://127.0.0.1:5000/` (modo debug ativado por padrão).
@@ -140,6 +142,6 @@ Sugestões: Adicionar suporte a mais modelos de IA, autenticação ou integraç�
 Este projeto está sob a licença MIT.
 
 Desenvolvido com muita dedicação por:
-- [Luan](https://github.com/luanfelixcoding)
-- [Felipe](https://github.com/mafra013)
-- [Graziela](https://github.com/GrazielaAntiorio)
+- [Luan](https://github.com/luanfelixcoding) - luan.pereira@unisantos.br
+- [Felipe](https://github.com/mafra013) - mafra@unisantos.br
+- [Graziela](https://github.com/GrazielaAntiorio) - antiorio@unisantos.br
