@@ -140,8 +140,3 @@ Sugestões: Adicionar suporte a mais modelos de IA, autenticação ou integraç�
 ## Licença
 
 Este projeto está sob a licença MIT.
-
-Desenvolvido com muita dedicação por:
-- [Luan](https://github.com/luanfelixcoding) - luan.pereira@unisantos.br
-- [Felipe](https://github.com/mafra013) - mafra@unisantos.br
-- [Graziela](https://github.com/GrazielaAntiorio) - antiorio@unisantos.br
